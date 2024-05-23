@@ -6,6 +6,7 @@ use Slim\Factory\AppFactory;
 use App\Database;
 use App\UserApi;
 use App\ProductApi;
+use App\VendorApi;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -31,6 +32,27 @@ $app->get('/api/user/{id}', function (Request $request, Response $response, $arg
     return $response;
 });
 
+/*product*/
+$app->get('/api/products/getlist', function (Request $request, Response $response, $args) use ($database) {
+    $productApi = new ProductApi($database);
+    $result = $productApi->productResult();
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
 
+$app->post('/api/products/addProduct', function (Request $request, Response $response) use ($database) {
+    $productApi = new ProductApi($database);
+    $data = $request->getParsedBody();
+    $result = $productApi->addProduct($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
 
+/*vendor*/
+$app->get('/api/vendor/getlist', function (Request $request, Response $response, $args) use ($database) {
+    $productApi = new VendorApi($database);
+    $result = $productApi->getVendorList();
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
 $app->run();
