@@ -8,6 +8,7 @@ use App\Database;
 use App\UserApi;
 use App\ProductApi;
 use App\VendorApi;
+use App\CartApi;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -96,6 +97,30 @@ $app->post('/api/product/update', function (Request $request, Response $response
     $productApi = new ProductApi($database);
     $data = $request->getParsedBody();
     $result = $productApi->updateProduct($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/cart/add', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->insertCartItem($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/cart/update', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->updateCartItem($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/cart/delete', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->deleteCartItem($data);
     $response->getBody()->write(json_encode($result));
     return $response;
 });
