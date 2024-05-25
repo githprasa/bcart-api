@@ -74,7 +74,47 @@ class ProductApi {
             $this->db->close();
             return $response;
         }
+    }
 
+    public function bulkaddProduct($params){
+        $response=[];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            if(is_array($params) && count($params) > 0) {
+                $query = "INSERT INTO product (Product, Description, Detail_Description, Category,
+                        Vendor,ERP_Item_Reference,IsActive,ContractNumber,ContractItemNumber,Deliverytime,Location,price) 
+                        values (:product,:description,:detaildescription,:category,:vendor,:erp,:isactive,:contractnumber,
+                        :contractitemnumber,:deliverytime,:location,:price)";
+                $conn = $this->db->connect();            
+                $stmt = $conn->prepare($query);
+                foreach ($params as $products) {
+                    $stmt->bindParam(':product', $products['product']);
+                    $stmt->bindParam(':description', $products['description']);
+                    $stmt->bindParam(':detaildescription', $products['detaildescription']);
+                    $stmt->bindParam(':category', $products['category']);
+                    $stmt->bindParam(':vendor', $products['vendor']);
+                    $stmt->bindParam(':erp', $products['erp']);
+                    $stmt->bindParam(':isactive', $products['isactive']);
+                    $stmt->bindParam(':contractnumber', $products['contractnumber']);
+                    $stmt->bindParam(':contractitemnumber', $products['contractitemnumber']);
+                    $stmt->bindParam(':deliverytime', $products['deliverytime']);
+                    $stmt->bindParam(':location', $products['location']);
+                    $stmt->bindParam(':price', $products['price']);
+                    $stmt->execute();
+                }
+                $response['status']=true;
+                $response['data']='Data inserted successfully';
+            }
+        } catch (\Exception $e) {
+            $response['message']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;            
+        } finally {
+            $this->db->close();
+            return $response;
+        }
     }
 
 }

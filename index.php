@@ -74,4 +74,13 @@ $app->get('/api/users', function (Request $request, Response $response, $args) u
     return $response;
 });
 
+
+$app->post('/api/product/bulkadd', function (Request $request, Response $response, $args) use ($database) {
+    $productApi = new ProductApi($database);
+    $data = $request->getParsedBody();
+    $result = $productApi->bulkaddProduct($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 $app->run();
