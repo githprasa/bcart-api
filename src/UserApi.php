@@ -61,4 +61,29 @@ class UserApi {
         }
     }
 
+    public function getUsers() {
+        $response=[];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            $query = "SELECT * FROM users";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+            $row_result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            if(count($row_result) >0) {
+                $response['status']=true;
+                $response['data']=$row_result;
+            }
+        } catch (\Exception $e) {
+            $response['data']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
 }

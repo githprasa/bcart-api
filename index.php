@@ -2,6 +2,7 @@
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Factory\AppFactory;
 use App\Database;
 use App\UserApi;
@@ -13,6 +14,16 @@ require __DIR__ . '/vendor/autoload.php';
 $app = AppFactory::create();
 $app->setBasePath('/bcart-api');
 $database = new Database();
+
+$corsMiddleware = function (Request $request, RequestHandlerInterface $handler) : Response {
+    $response = $handler->handle($request);
+    return $response
+        ->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+};
+
+$app->add($corsMiddleware);
 
 $app->post('/api/user/login', function (Request $request, Response $response) use ($database) {
     $userApi = new UserApi($database);
@@ -55,4 +66,12 @@ $app->get('/api/vendor/getlist', function (Request $request, Response $response,
     $response->getBody()->write(json_encode($result));
     return $response;
 });
+
+$app->get('/api/users', function (Request $request, Response $response, $args) use ($database) {
+    $userApi = new UserApi($database);
+    $result = $userApi->getUsers();
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 $app->run();
