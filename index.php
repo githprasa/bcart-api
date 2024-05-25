@@ -9,6 +9,7 @@ use App\UserApi;
 use App\ProductApi;
 use App\VendorApi;
 use App\CartApi;
+use App\OrdersApi;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -121,6 +122,23 @@ $app->post('/api/cart/delete', function (Request $request, Response $response, $
     $CartApi = new CartApi($database);
     $data = $request->getParsedBody();
     $result = $CartApi->deleteCartItem($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+
+$app->post('/api/order/add', function (Request $request, Response $response, $args) use ($database) {
+    $OrdersApi = new OrdersApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->createOrder($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/order/createOrderItem', function (Request $request, Response $response, $args) use ($database) {
+    $OrdersApi = new OrdersApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->createOrderItem($data);
     $response->getBody()->write(json_encode($result));
     return $response;
 });
