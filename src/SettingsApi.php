@@ -1,21 +1,20 @@
 <?php
 namespace App;
 
-class CategoryApi{
-
+class SettingsApi {
     private $db;
 
     public function __construct(Database $db) {
         $this->db = $db;
     }
 
-    public function getCategoryList(){
+    public function getSettingsList(){
 
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT * from category";
+            $query = "SELECT * from settings";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -37,14 +36,14 @@ class CategoryApi{
         }
 
     }
-
-    public function getCategorydetails($id) {
+    
+    public function getSettingsdetails($id) {
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT * from category 
-                      where id = :id";
+            $query = "SELECT * from settings 
+                      where SettingId = :id";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -67,22 +66,25 @@ class CategoryApi{
         }
     }
 
-    public function addCategory($params){
+    public function addSetting($params){
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "INSERT INTO category (Category, Description) 
-                      values (:category,:description)";
+            $query = "INSERT INTO settings (AppName, ApiUrl,ApiKey,ApiSecret,AdditionalFields) 
+                      values (:appname,:apiurl,:apikey,:apisecret,:additionalfields)";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':category', $params['category']);
-            $stmt->bindParam(':description', $params['description']);
+            $stmt->bindParam(':appname', $params['appname']);
+            $stmt->bindParam(':apiurl', $params['apiurl']);
+            $stmt->bindParam(':apikey', $params['apikey']);
+            $stmt->bindParam(':apisecret', $params['apisecret']);
+            $stmt->bindParam(':additionalfields', $params['additionalfields']);
             $result = $stmt->execute();
             if($result){
                 $response['status']=true;
-                $response['data']='New Category added successfully';
+                $response['data']='New Settings added successfully';
             }
             
         } catch (\Exception $e) {
@@ -97,22 +99,26 @@ class CategoryApi{
 
     }
 
-    public function updateCategory($params){
+    public function updateSetting($params){
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "UPDATE category SET Category=:category, Description= :description  WHERE id =:id ";
+            $query = "UPDATE settings SET AppName = :appname, ApiUrl = :apiurl,ApiKey = :apikey,
+            ApiSecret =:apisecret,AdditionalFields = :additionalfields WHERE SettingId =:id ";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':category', $params['category']);
-            $stmt->bindParam(':description', $params['description']);
+            $stmt->bindParam(':appname', $params['appname']);
+            $stmt->bindParam(':apiurl', $params['apiurl']);
+            $stmt->bindParam(':apikey', $params['apikey']);
+            $stmt->bindParam(':apisecret', $params['apisecret']);
+            $stmt->bindParam(':additionalfields', $params['additionalfields']);
             $stmt->bindParam(':id', $params['id']);
             $result = $stmt->execute();
             if($result){
                 $response['status']=true;
-                $response['data']='Updated category successfully';
+                $response['data']='Updated Setting successfully';
             }
             
         } catch (\Exception $e) {
@@ -127,12 +133,12 @@ class CategoryApi{
 
     }
 
-    public function deleteCategory($id) {
+    public function deleteSetting($id) {
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "DELETE FROM category WHERE id= :id LIMIT 1";
+            $query = "DELETE FROM settings WHERE SettingId= :id LIMIT 1";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -152,6 +158,4 @@ class CategoryApi{
             return $response;
         }
     }
-
 }
-

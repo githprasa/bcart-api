@@ -11,7 +11,7 @@ class ProductApi {
     public function productResult() {
         $response=[];
         $response['status']=false;
-        $response['data'][]='';
+        $response['data']='';
         try {
             $query = "SELECT P.id, P.Product , P.Description , P.Detail_Description, P.ERP_Item_Reference, P.IsActive, C.Category, V.vendor,
                       P.ContractNumber, P.ContractItemNumber, P.Deliverytime, L.LocationName, P.price from product P 
@@ -23,6 +23,35 @@ class ProductApi {
             $stmt = $conn->prepare($query);
             $stmt->execute();
             $row_result = $stmt->fetchAll();
+            if(count($row_result) >0) {
+                $response['status']=true;
+                $response['data']=$row_result;           
+                
+            }
+        } catch (\Exception $e) {
+            $response['message']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;            
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function getProductdetails($id) {
+        $response=[];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            $query = "SELECT * from product P 
+                      where id = :id";
+
+            $conn = $this->db->connect();            
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $row_result = $stmt->fetch(\PDO::FETCH_ASSOC);
             if(count($row_result) >0) {
                 $response['status']=true;
                 $response['data']=$row_result;           
@@ -63,7 +92,11 @@ class ProductApi {
             $stmt->bindParam(':deliverytime', $params['deliverytime']);
             $stmt->bindParam(':location', $params['location']);
             $stmt->bindParam(':price', $params['price']);
-            $stmt->execute();
+            $result = $stmt->execute();
+            if($result){
+                $response['status']=true;
+                $response['data']='New Product added successfully';
+            }
             
         } catch (\Exception $e) {
             $response['message']='Error : ' . $e->getMessage();

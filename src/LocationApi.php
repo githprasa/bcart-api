@@ -1,21 +1,20 @@
 <?php
 namespace App;
 
-class CategoryApi{
-
+class LocationApi {
     private $db;
 
     public function __construct(Database $db) {
         $this->db = $db;
     }
 
-    public function getCategoryList(){
+    public function getLocationList(){
 
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT * from category";
+            $query = "SELECT * from locations";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -37,14 +36,14 @@ class CategoryApi{
         }
 
     }
-
-    public function getCategorydetails($id) {
+    
+    public function getLocationdetails($id) {
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT * from category 
-                      where id = :id";
+            $query = "SELECT * from locations 
+                      where Id = :id";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -67,22 +66,26 @@ class CategoryApi{
         }
     }
 
-    public function addCategory($params){
+    public function addLocation($params){
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "INSERT INTO category (Category, Description) 
-                      values (:category,:description)";
+            $query = "INSERT INTO locations (LocationName, Area,City,StateProvince,Country,ZipCode) 
+                      values (:location,:area,:city,:state,:country,:zip)";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':category', $params['category']);
-            $stmt->bindParam(':description', $params['description']);
+            $stmt->bindParam(':location', $params['location']);
+            $stmt->bindParam(':area', $params['area']);
+            $stmt->bindParam(':city', $params['city']);
+            $stmt->bindParam(':state', $params['state']);
+            $stmt->bindParam(':country', $params['country']);
+            $stmt->bindParam(':zip', $params['zip']);
             $result = $stmt->execute();
             if($result){
                 $response['status']=true;
-                $response['data']='New Category added successfully';
+                $response['data']='New Location added successfully';
             }
             
         } catch (\Exception $e) {
@@ -97,22 +100,27 @@ class CategoryApi{
 
     }
 
-    public function updateCategory($params){
+    public function updateLocation($params){
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "UPDATE category SET Category=:category, Description= :description  WHERE id =:id ";
+            $query = "UPDATE locations SET LocationName=:location, Area= :area, City = :city,StateProvince = :state,
+            Country = :country,ZipCode = :zip WHERE Id =:id ";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':category', $params['category']);
-            $stmt->bindParam(':description', $params['description']);
+            $stmt->bindParam(':location', $params['location']);
+            $stmt->bindParam(':area', $params['area']);
+            $stmt->bindParam(':city', $params['city']);
+            $stmt->bindParam(':state', $params['state']);
+            $stmt->bindParam(':country', $params['country']);
+            $stmt->bindParam(':zip', $params['zip']);
             $stmt->bindParam(':id', $params['id']);
             $result = $stmt->execute();
             if($result){
                 $response['status']=true;
-                $response['data']='Updated category successfully';
+                $response['data']='Updated Location successfully';
             }
             
         } catch (\Exception $e) {
@@ -127,12 +135,12 @@ class CategoryApi{
 
     }
 
-    public function deleteCategory($id) {
+    public function deleteLocation($id) {
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "DELETE FROM category WHERE id= :id LIMIT 1";
+            $query = "DELETE FROM locations WHERE Id= :id LIMIT 1";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -152,6 +160,4 @@ class CategoryApi{
             return $response;
         }
     }
-
 }
-
