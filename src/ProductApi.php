@@ -117,4 +117,75 @@ class ProductApi {
         }
     }
 
+    public function deleteProduct($productId) {
+        $response = [];
+        $response['status'] = false;
+        try {
+            $query = "DELETE FROM product WHERE id = :productId";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':productId', $productId);
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $response['status'] = true;
+                $response['message'] = 'Product deleted successfully';
+            } else {
+                $response['message'] = 'No product found or already deleted';
+            }
+        } catch (\Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function updateProduct($productDetails) {
+        $response = [];
+        $response['status'] = false;
+        try {
+            $query = "UPDATE product SET Product = :product, Description = :description, Detail_Description = :detailDescription, 
+                      Category = :category, Vendor = :vendor, ERP_Item_Reference = :erpItemReference, IsActive = :isActive, 
+                      ContractNumber = :contractNumber, ContractItemNumber = :contractItemNumber, Deliverytime = :deliveryTime, 
+                      Location = :location, Price = :price WHERE id = :id";
+    
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            // Bind parameters from the array
+            $stmt->bindParam(':id', $productDetails['id']);
+            $stmt->bindParam(':product', $productDetails['product']);
+            $stmt->bindParam(':description', $productDetails['description']);
+            $stmt->bindParam(':detailDescription', $productDetails['detailDescription']);
+            $stmt->bindParam(':category', $productDetails['category']);
+            $stmt->bindParam(':vendor', $productDetails['vendor']);
+            $stmt->bindParam(':erpItemReference', $productDetails['erp']);
+            $stmt->bindParam(':isActive', $productDetails['isActive']);
+            $stmt->bindParam(':contractNumber', $productDetails['contractNumber']);
+            $stmt->bindParam(':contractItemNumber', $productDetails['contractItemNumber']);
+            $stmt->bindParam(':deliveryTime', $productDetails['deliveryTime']);
+            $stmt->bindParam(':location', $productDetails['location']);
+            $stmt->bindParam(':price', $productDetails['price']);
+    
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $response['status'] = true;
+                $response['message'] = 'Product updated successfully';
+            } else {
+                $response['message'] = 'No changes made or product not found';
+            }
+        } catch (\Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+            $response['file'] = $e->getFile();
+            $response['line number'] = $e->getLine();
+            $response['logResult'] = -1;
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+    
+    
+
 }

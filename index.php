@@ -83,4 +83,21 @@ $app->post('/api/product/bulkadd', function (Request $request, Response $respons
     return $response;
 });
 
+$app->post('/api/product/delete', function (Request $request, Response $response, $args) use ($database) {
+    $productApi = new ProductApi($database);
+    $data = $request->getParsedBody();
+    $productid = isset($data['productid'])? $data['productid'] : '0';
+    $result = $productApi->deleteProduct($productid);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/product/update', function (Request $request, Response $response, $args) use ($database) {
+    $productApi = new ProductApi($database);
+    $data = $request->getParsedBody();
+    $result = $productApi->updateProduct($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 $app->run();
