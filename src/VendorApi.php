@@ -15,8 +15,9 @@ class VendorApi{
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT v.id, v.Vendor, v.Description, v.ERP_Reference , l.LocationName from vendor v 
-                        inner join locations l on l.Id = v.Location";
+            // $query = "SELECT v.id, v.Vendor, v.Description, v.ERP_Reference , l.LocationName from vendor v 
+            //             inner join locations l on l.Id = v.Location";
+            $query = "SELECT * from vendor";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);

@@ -21,11 +21,19 @@ $app->setBasePath('/bcart-api');
 $database = new Database();
 
 $corsMiddleware = function (Request $request, RequestHandlerInterface $handler) : Response {
-    $response = $handler->handle($request);
-    return $response
+    if ($request->getMethod() == 'OPTIONS') {
+        $response = new \Slim\Psr7\Response();
+    } else {
+        $response = $handler->handle($request);
+    }
+    $response = $response
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    // if ($request->getMethod() == 'OPTIONS') {
+    //     return $response;
+    // }
+    return $response;
 };
 
 $app->add($corsMiddleware);
