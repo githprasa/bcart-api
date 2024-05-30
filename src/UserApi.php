@@ -86,4 +86,114 @@ class UserApi {
         }
     }
 
+    public function addUser($params){
+        $response=[];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            $query = "INSERT INTO users (FirstName, LastName,RoleId,Email,Phone,Address1,Address2,UserId,Password,LocationId,CostObject,Currency) 
+                      values (:FirstName, :LastName,:RoleId,:Email,:Phone,:Address1,:Address2,:UserId,:Password,:LocationId,:CostObject,:Currency)";
+
+            $conn = $this->db->connect();            
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':FirstName', $params['FirstName']);
+            $stmt->bindParam(':LastName', $params['LastName']);
+            $stmt->bindParam(':RoleId', $params['RoleId']);
+            $stmt->bindParam(':Email', $params['Email']);
+            $stmt->bindParam(':Phone', $params['Phone']);
+            $stmt->bindParam(':Address1', $params['Address1']);
+            $stmt->bindParam(':Address2', $params['Address2']);
+            $stmt->bindParam(':UserId', $params['UserId']);
+            $stmt->bindParam(':Password', $params['Password']);
+            $stmt->bindParam(':LocationId', $params['LocationId']);
+            $stmt->bindParam(':CostObject', $params['CostObject']);
+            $stmt->bindParam(':Currency', $params['Currency']);
+            $result = $stmt->execute();
+            if($result){
+                $response['status']=true;
+                $response['data']='New user added successfully';
+            }else{
+                $response['data']='Failed to add user';
+            }
+            
+        } catch (\Exception $e) {
+            $response['message']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;            
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+
+    }
+
+    public function updateUser($params){
+        $response=[];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            $query = "UPDATE users SET FirstName=:FirstName, LastName= :LastName, RoleId = :RoleId,
+            Email = :Email,Phone=:Phone,Address1=:Address1,Address2=:Address2,UserId=:UserId,
+            Password=:Password,LocationId=:LocationId,CostObject=:CostObject ,Currency=:Currency WHERE Id =:id ";
+
+            $conn = $this->db->connect();            
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':FirstName', $params['FirstName']);
+            $stmt->bindParam(':LastName', $params['LastName']);
+            $stmt->bindParam(':RoleId', $params['RoleId']);
+            $stmt->bindParam(':Email', $params['Email']);
+            $stmt->bindParam(':Phone', $params['Phone']);
+            $stmt->bindParam(':Address1', $params['Address1']);
+            $stmt->bindParam(':Address2', $params['Address2']);
+            $stmt->bindParam(':UserId', $params['UserId']);
+            $stmt->bindParam(':Password', $params['Password']);
+            $stmt->bindParam(':LocationId', $params['LocationId']);
+            $stmt->bindParam(':CostObject', $params['CostObject']);
+            $stmt->bindParam(':Currency', $params['Currency']);
+            $stmt->bindParam(':id', $params['id']);
+            $result = $stmt->execute();
+            if($result){
+                $response['status']=true;
+                $response['data']='Updated user successfully';
+            }else{
+                $response['data']='Updated user failed';
+            }
+            
+        } catch (\Exception $e) {
+            $response['message']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;            
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+
+    }
+
+    public function deleteUser($userid) {
+        $response = [];
+        $response['status'] = false;
+        try {
+            $query = "DELETE FROM users WHERE Id = :id";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':id', $userid);
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $response['status'] = true;
+                $response['message'] = 'User deleted successfully';
+            } else {
+                $response['message'] = 'No user found';
+            }
+        } catch (\Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
 }

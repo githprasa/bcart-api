@@ -48,10 +48,74 @@ $app->post('/api/user/login', function (Request $request, Response $response) us
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+/*user*/
 $app->get('/api/user/{id}', function (Request $request, Response $response, $args) use ($database) {
     $userApi = new UserApi($database);
     $id = isset($args['id'])? $args['id'] : '0';
     $result = $userApi->getUser($id);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->get('/api/users', function (Request $request, Response $response, $args) use ($database) {
+    $userApi = new UserApi($database);
+    $result = $userApi->getUsers();
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+
+/*Add new user*/
+$app->post('/api/user/addUser', function (Request $request, Response $response) use ($database) {
+    $userApi = new UserApi($database);
+    $data = $request->getParsedBody();
+    $params = [];
+    $params['FirstName'] = isset($data['FirstName'])? $data['FirstName'] : '';
+    $params['LastName'] = isset($data['LastName'])? $data['LastName'] : '';
+    $params['RoleId'] = isset($data['RoleId'])? $data['RoleId'] : '';
+    $params['Email'] = isset($data['Email'])? $data['Email'] : '';
+    $params['Phone'] = isset($data['Phone'])? $data['Phone'] : '';
+    $params['Address1'] = isset($data['Address1'])? $data['Address1'] : '';
+    $params['Address2'] = isset($data['Address2'])? $data['Address2'] : '';
+    $params['UserId'] = isset($data['UserId'])? $data['UserId'] : '';
+    $params['Password'] = isset($data['Password'])? $data['Password'] : '';
+    $params['LocationId'] = isset($data['LocationId'])? $data['LocationId'] : '';
+    $params['CostObject'] = isset($data['CostObject'])? $data['CostObject'] : '';
+    $params['Currency'] = isset($data['Currency'])? $data['Currency'] : '';
+    $result = $userApi->addUser($params);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+/*Update user*/
+$app->post('/api/user/updateUser', function (Request $request, Response $response) use ($database) {
+    $userApi = new UserApi($database);
+    $data = $request->getParsedBody();
+    $params = [];
+    $params['FirstName'] = isset($data['FirstName'])? $data['FirstName'] : '';
+    $params['LastName'] = isset($data['LastName'])? $data['LastName'] : '';
+    $params['RoleId'] = isset($data['RoleId'])? $data['RoleId'] : '';
+    $params['Email'] = isset($data['Email'])? $data['Email'] : '';
+    $params['Phone'] = isset($data['Phone'])? $data['Phone'] : '';
+    $params['Address1'] = isset($data['Address1'])? $data['Address1'] : '';
+    $params['Address2'] = isset($data['Address2'])? $data['Address2'] : '';
+    $params['UserId'] = isset($data['UserId'])? $data['UserId'] : '';
+    $params['Password'] = isset($data['Password'])? $data['Password'] : '';
+    $params['LocationId'] = isset($data['LocationId'])? $data['LocationId'] : '';
+    $params['CostObject'] = isset($data['CostObject'])? $data['CostObject'] : '';
+    $params['Currency'] = isset($data['Currency'])? $data['Currency'] : '';
+    $params['id'] = isset($data['id'])? $data['id'] : 0;    
+    $result = $userApi->updateUser($params);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+/*Delete user*/
+$app->post('/api/user/deleteUser', function (Request $request, Response $response) use ($database) {
+    $userApi = new UserApi($database);
+    $data = $request->getParsedBody();
+    $userid = isset($data['id'])? $data['id'] : '';
+    $result = $userApi->deleteUser($userid);
     $response->getBody()->write(json_encode($result));
     return $response;
 });
@@ -324,13 +388,6 @@ $app->post('/api/settings/deleteSetting', function (Request $request, Response $
     $data = $request->getParsedBody();
     $userid = isset($data['id'])? $data['id'] : '';
     $result = $settingsApi->deleteSetting($userid);
-    $response->getBody()->write(json_encode($result));
-    return $response;
-});
-
-$app->get('/api/users', function (Request $request, Response $response, $args) use ($database) {
-    $userApi = new UserApi($database);
-    $result = $userApi->getUsers();
     $response->getBody()->write(json_encode($result));
     return $response;
 });
