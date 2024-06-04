@@ -25,8 +25,7 @@ class ProductApi {
             $row_result = $stmt->fetchAll();
             if(count($row_result) >0) {
                 $response['status']=true;
-                $response['data']=$row_result;           
-                
+                $response['data']=$row_result;
             }
         } catch (\Exception $e) {
             $response['message']='Error : ' . $e->getMessage();
@@ -80,17 +79,17 @@ class ProductApi {
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':product', $params['product']);
-            $stmt->bindParam(':description', $params['description']);
-            $stmt->bindParam(':detaildescription', $params['detaildescription']);
-            $stmt->bindParam(':category', $params['category']);
-            $stmt->bindParam(':vendor', $params['vendor']);
-            $stmt->bindParam(':erp', $params['erp']);
-            $stmt->bindParam(':isactive', $params['isactive']);
-            $stmt->bindParam(':contractnumber', $params['contractnumber']);
-            $stmt->bindParam(':contractitemnumber', $params['contractitemnumber']);
-            $stmt->bindParam(':deliverytime', $params['deliverytime']);
-            $stmt->bindParam(':location', $params['location']);
+            $stmt->bindParam(':product', $params['Product']);
+            $stmt->bindParam(':description', $params['Description']);
+            $stmt->bindParam(':detaildescription', $params['Detail_Description']);
+            $stmt->bindParam(':category', $params['Category']);
+            $stmt->bindParam(':vendor', $params['Vendor']);
+            $stmt->bindParam(':erp', $params['ERP_Item_Reference']);
+            $stmt->bindParam(':isactive', $params['IsActive']);
+            $stmt->bindParam(':contractnumber', $params['ContractNumber']);
+            $stmt->bindParam(':contractitemnumber', $params['ContractItemNumber']);
+            $stmt->bindParam(':deliverytime', $params['Deliverytime']);
+            $stmt->bindParam(':location', $params['Location']);
             $stmt->bindParam(':price', $params['price']);
             $result = $stmt->execute();
             if($result){
@@ -122,17 +121,17 @@ class ProductApi {
                 $conn = $this->db->connect();            
                 $stmt = $conn->prepare($query);
                 foreach ($params as $products) {
-                    $stmt->bindParam(':product', $products['product']);
-                    $stmt->bindParam(':description', $products['description']);
-                    $stmt->bindParam(':detaildescription', $products['detaildescription']);
-                    $stmt->bindParam(':category', $products['category']);
-                    $stmt->bindParam(':vendor', $products['vendor']);
-                    $stmt->bindParam(':erp', $products['erp']);
-                    $stmt->bindParam(':isactive', $products['isactive']);
-                    $stmt->bindParam(':contractnumber', $products['contractnumber']);
-                    $stmt->bindParam(':contractitemnumber', $products['contractitemnumber']);
-                    $stmt->bindParam(':deliverytime', $products['deliverytime']);
-                    $stmt->bindParam(':location', $products['location']);
+                    $stmt->bindParam(':product', $products['Product']);
+                    $stmt->bindParam(':description', $products['Description']);
+                    $stmt->bindParam(':detaildescription', $products['Detail_Description']);
+                    $stmt->bindParam(':category', $products['Category']);
+                    $stmt->bindParam(':vendor', $products['Vendor']);
+                    $stmt->bindParam(':erp', $products['ERP_Item_Reference']);
+                    $stmt->bindParam(':isactive', $products['IsActive']);
+                    $stmt->bindParam(':contractnumber', $products['ContractNumber']);
+                    $stmt->bindParam(':contractitemnumber', $products['ContractItemNumber']);
+                    $stmt->bindParam(':deliverytime', $products['Deliverytime']);
+                    $stmt->bindParam(':location', $products['Location']);
                     $stmt->bindParam(':price', $products['price']);
                     $stmt->execute();
                 }
@@ -186,20 +185,19 @@ class ProductApi {
             $conn = $this->db->connect();
             $stmt = $conn->prepare($query);
             // Bind parameters from the array
-            $stmt->bindParam(':id', $productDetails['id']);
-            $stmt->bindParam(':product', $productDetails['product']);
-            $stmt->bindParam(':description', $productDetails['description']);
-            $stmt->bindParam(':detailDescription', $productDetails['detailDescription']);
-            $stmt->bindParam(':category', $productDetails['category']);
-            $stmt->bindParam(':vendor', $productDetails['vendor']);
-            $stmt->bindParam(':erpItemReference', $productDetails['erp']);
-            $stmt->bindParam(':isActive', $productDetails['isActive']);
-            $stmt->bindParam(':contractNumber', $productDetails['contractNumber']);
-            $stmt->bindParam(':contractItemNumber', $productDetails['contractItemNumber']);
-            $stmt->bindParam(':deliveryTime', $productDetails['deliveryTime']);
-            $stmt->bindParam(':location', $productDetails['location']);
+            $stmt->bindParam(':id', $productDetails['id']);          
+            $stmt->bindParam(':product', $productDetails['Product']);
+            $stmt->bindParam(':description', $productDetails['Description']);
+            $stmt->bindParam(':detaildescription', $productDetails['Detail_Description']);
+            $stmt->bindParam(':category', $productDetails['Category']);
+            $stmt->bindParam(':vendor', $productDetails['Vendor']);
+            $stmt->bindParam(':erp', $productDetails['ERP_Item_Reference']);
+            $stmt->bindParam(':isactive', $productDetails['IsActive']);
+            $stmt->bindParam(':contractnumber', $productDetails['ContractNumber']);
+            $stmt->bindParam(':contractitemnumber', $productDetails['ContractItemNumber']);
+            $stmt->bindParam(':deliverytime', $productDetails['Deliverytime']);
+            $stmt->bindParam(':location', $productDetails['Location']);
             $stmt->bindParam(':price', $productDetails['price']);
-    
             $stmt->execute();
     
             if ($stmt->rowCount() > 0) {
