@@ -177,17 +177,17 @@ class ProductApi {
         $response = [];
         $response['status'] = false;
         try {
-            $query = "UPDATE product SET Product = :product, Description = :description, Detail_Description = :detailDescription, 
-                      Category = :category, Vendor = :vendor, ERP_Item_Reference = :erpItemReference, IsActive = :isActive, 
-                      ContractNumber = :contractNumber, ContractItemNumber = :contractItemNumber, Deliverytime = :deliveryTime, 
-                      Location = :location, Price = :price WHERE id = :id";
-    
+            $query = "UPDATE product SET Product = :product, `Description` = :descriptions, Detail_Description = :detaildescription, 
+                      Category = :category, Vendor = :vendor, ERP_Item_Reference = :erp, IsActive = :isactive, 
+                      ContractNumber = :contractnumber, ContractItemNumber = :contractitemnumber, Deliverytime = :deliverytime, 
+                      `Location` = :location, Price = :price WHERE id = :id";
+
             $conn = $this->db->connect();
             $stmt = $conn->prepare($query);
             // Bind parameters from the array
             $stmt->bindParam(':id', $productDetails['id']);          
             $stmt->bindParam(':product', $productDetails['Product']);
-            $stmt->bindParam(':description', $productDetails['Description']);
+            $stmt->bindParam(':descriptions', $productDetails['Description']);
             $stmt->bindParam(':detaildescription', $productDetails['Detail_Description']);
             $stmt->bindParam(':category', $productDetails['Category']);
             $stmt->bindParam(':vendor', $productDetails['Vendor']);
