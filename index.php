@@ -342,6 +342,7 @@ $app->get('/api/settings/getlist', function (Request $request, Response $respons
     return $response;
 });
 
+
 /*get setting details*/
 $app->get('/api/settings/getSettingdetails/{id}', function (Request $request, Response $response, $args) use ($database) {
     $settingsApi = new SettingsApi($database);
@@ -426,6 +427,14 @@ $app->post('/api/cart/add', function (Request $request, Response $response, $arg
     return $response;
 });
 
+$app->get('/api/cart/list', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $userId=1;
+    $result = $CartApi->getCartItems($userId);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 $app->post('/api/cart/update', function (Request $request, Response $response, $args) use ($database) {
     $CartApi = new CartApi($database);
     $data = $request->getParsedBody();
@@ -441,7 +450,6 @@ $app->post('/api/cart/delete', function (Request $request, Response $response, $
     $response->getBody()->write(json_encode($result));
     return $response;
 });
-
 
 $app->post('/api/order/add', function (Request $request, Response $response, $args) use ($database) {
     $OrdersApi = new OrdersApi($database);

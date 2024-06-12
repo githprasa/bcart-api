@@ -15,9 +15,9 @@ class ProductApi {
         try {
             $query = "SELECT P.id, P.Product , P.Description , P.Detail_Description, P.ERP_Item_Reference, P.IsActive, C.Category, V.vendor,
                       P.ContractNumber, P.ContractItemNumber, P.Deliverytime, L.LocationName, P.price from product P 
-                      inner join category C on C.id = P.Category
-                      inner join vendor V on V.id = P.Vendor
-                      inner join locations L on L.Id = P.Location";
+                      left join category C on C.id = P.Category
+                      left join vendor V on V.id = P.Vendor
+                      left join locations L on L.Id = P.Location";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -43,8 +43,12 @@ class ProductApi {
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT * from product P 
-                      where id = :id";
+            $query = "SELECT P.id,P.Product,P.Description,P.Detail_Description,C.Category as Category,V.Vendor as Vendor,
+                    P.ERP_Item_Reference,P.IsActive,P.ContractNumber,
+                    P.ContractItemNumber,P.Deliverytime,L.LocationName as Location,
+                    P.price from product P left join category C on C.id = P.Category
+                      left join vendor V on V.id = P.Vendor
+                      left join locations L on L.Id = P.Location where P.id = :id";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -72,24 +76,46 @@ class ProductApi {
         $response['status']=false;
         $response['data']='';
         try {
+            $conn = $this->db->connect();
+            $locationQuery = "SELECT Id FROM locations WHERE LocationName = :location";
+            $locationStmt = $conn->prepare($locationQuery);
+            $locationStmt->bindParam(':location', $params['Location']);
+            $locationStmt->execute();
+            $location = $locationStmt->fetch(\PDO::FETCH_ASSOC);
+            $location=$location['Id'] ?? '0';
+            // For Vendor
+            $vendorQuery = "SELECT id FROM vendor WHERE Vendor = :vendor";
+            $vendorStmt = $conn->prepare($vendorQuery);
+            $vendorStmt->bindParam(':vendor', $params['Vendor']);
+            $vendorStmt->execute();
+            $vendor = $vendorStmt->fetch(\PDO::FETCH_ASSOC);
+            $vendorId = $vendor['id'] ?? '0'; // Default to '0' if not found
+            // For Category
+            $categoryQuery = "SELECT id FROM category WHERE Category = :category";
+            $categoryStmt = $conn->prepare($categoryQuery);
+            $categoryStmt->bindParam(':category', $params['Category']);
+            $categoryStmt->execute();
+            $category = $categoryStmt->fetch(\PDO::FETCH_ASSOC);
+            $categoryId = $category['id'] ?? '0'; // Default to '0' if not found
+
             $query = "INSERT INTO product (Product, Description, Detail_Description, Category,
                       Vendor,ERP_Item_Reference,IsActive,ContractNumber,ContractItemNumber,Deliverytime,Location,price) 
                       values (:product,:description,:detaildescription,:category,:vendor,:erp,:isactive,:contractnumber,
                       :contractitemnumber,:deliverytime,:location,:price)";
 
-            $conn = $this->db->connect();            
+                        
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':product', $params['Product']);
             $stmt->bindParam(':description', $params['Description']);
             $stmt->bindParam(':detaildescription', $params['Detail_Description']);
-            $stmt->bindParam(':category', $params['Category']);
-            $stmt->bindParam(':vendor', $params['Vendor']);
+            $stmt->bindParam(':category', $categoryId);
+            $stmt->bindParam(':vendor', $vendorId);
             $stmt->bindParam(':erp', $params['ERP_Item_Reference']);
             $stmt->bindParam(':isactive', $params['IsActive']);
             $stmt->bindParam(':contractnumber', $params['ContractNumber']);
             $stmt->bindParam(':contractitemnumber', $params['ContractItemNumber']);
             $stmt->bindParam(':deliverytime', $params['Deliverytime']);
-            $stmt->bindParam(':location', $params['Location']);
+            $stmt->bindParam(':location', $location);
             $stmt->bindParam(':price', $params['price']);
             $result = $stmt->execute();
             if($result){
@@ -121,17 +147,17 @@ class ProductApi {
                 $conn = $this->db->connect();            
                 $stmt = $conn->prepare($query);
                 foreach ($params as $products) {
-                    $stmt->bindParam(':product', $products['Product']);
-                    $stmt->bindParam(':description', $products['Description']);
-                    $stmt->bindParam(':detaildescription', $products['Detail_Description']);
-                    $stmt->bindParam(':category', $products['Category']);
-                    $stmt->bindParam(':vendor', $products['Vendor']);
-                    $stmt->bindParam(':erp', $products['ERP_Item_Reference']);
-                    $stmt->bindParam(':isactive', $products['IsActive']);
-                    $stmt->bindParam(':contractnumber', $products['ContractNumber']);
-                    $stmt->bindParam(':contractitemnumber', $products['ContractItemNumber']);
-                    $stmt->bindParam(':deliverytime', $products['Deliverytime']);
-                    $stmt->bindParam(':location', $products['Location']);
+                    $stmt->bindParam(':product', $products['product']);
+                    $stmt->bindParam(':description', $products['description']);
+                    $stmt->bindParam(':detaildescription', $products['detail_description']);
+                    $stmt->bindParam(':category', $products['category']);
+                    $stmt->bindParam(':vendor', $products['vendor']);
+                    $stmt->bindParam(':erp', $products['erp_item_reference']);
+                    $stmt->bindParam(':isactive', $products['isactive']);
+                    $stmt->bindParam(':contractnumber', $products['contractnumber']);
+                    $stmt->bindParam(':contractitemnumber', $products['contractitemnumber']);
+                    $stmt->bindParam(':deliverytime', $products['deliverytime']);
+                    $stmt->bindParam(':location', $products['location']);
                     $stmt->bindParam(':price', $products['price']);
                     $stmt->execute();
                 }
@@ -177,26 +203,47 @@ class ProductApi {
         $response = [];
         $response['status'] = false;
         try {
+            $conn = $this->db->connect();
+            $locationQuery = "SELECT Id FROM locations WHERE LocationName = :location";
+            $locationStmt = $conn->prepare($locationQuery);
+            $locationStmt->bindParam(':location', $productDetails['Location']);
+            $locationStmt->execute();
+            $location = $locationStmt->fetch(\PDO::FETCH_ASSOC);
+            $location=$location['Id'] ?? '0';
+
+            $vendorQuery = "SELECT id FROM vendor WHERE Vendor = :vendor";
+            $vendorStmt = $conn->prepare($vendorQuery);
+            $vendorStmt->bindParam(':vendor', $productDetails['Vendor']);
+            $vendorStmt->execute();
+            $vendor = $vendorStmt->fetch(\PDO::FETCH_ASSOC);
+            $vendorId = $vendor['id'] ?? '0';
+
+            $categoryQuery = "SELECT id FROM category WHERE Category = :category";
+            $categoryStmt = $conn->prepare($categoryQuery);
+            $categoryStmt->bindParam(':category', $productDetails['Category']);
+            $categoryStmt->execute();
+            $category = $categoryStmt->fetch(\PDO::FETCH_ASSOC);
+            $categoryId = $category['id'] ?? '0';
+
             $query = "UPDATE product SET Product = :product, `Description` = :descriptions, Detail_Description = :detaildescription, 
                       Category = :category, Vendor = :vendor, ERP_Item_Reference = :erp, IsActive = :isactive, 
                       ContractNumber = :contractnumber, ContractItemNumber = :contractitemnumber, Deliverytime = :deliverytime, 
                       `Location` = :location, Price = :price WHERE id = :id";
-
-            $conn = $this->db->connect();
+            
             $stmt = $conn->prepare($query);
-            // Bind parameters from the array
+            
             $stmt->bindParam(':id', $productDetails['id']);          
             $stmt->bindParam(':product', $productDetails['Product']);
             $stmt->bindParam(':descriptions', $productDetails['Description']);
             $stmt->bindParam(':detaildescription', $productDetails['Detail_Description']);
-            $stmt->bindParam(':category', $productDetails['Category']);
-            $stmt->bindParam(':vendor', $productDetails['Vendor']);
+            $stmt->bindParam(':category', $categoryId);
+            $stmt->bindParam(':vendor', $vendorId);
             $stmt->bindParam(':erp', $productDetails['ERP_Item_Reference']);
             $stmt->bindParam(':isactive', $productDetails['IsActive']);
             $stmt->bindParam(':contractnumber', $productDetails['ContractNumber']);
             $stmt->bindParam(':contractitemnumber', $productDetails['ContractItemNumber']);
             $stmt->bindParam(':deliverytime', $productDetails['Deliverytime']);
-            $stmt->bindParam(':location', $productDetails['Location']);
+            $stmt->bindParam(':location', $location);
             $stmt->bindParam(':price', $productDetails['price']);
             $stmt->execute();
     

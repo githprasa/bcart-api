@@ -36,13 +36,37 @@ class CartApi{
         }
     }
 
+    public function getCartItems($userId) {
+        $response = ['status' => false, 'data' => []];
+        try {
+            $query = "SELECT c.id as cartItemId,c.UserId,c.ProductId,c.Quantity,c.VendorId as vendor,c.Location as location,p.Product as name,p.price as price FROM cartitems c JOIN  product p ON c.ProductId = p.id";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+            $items = $stmt->fetchAll();
+    
+            if ($items) {
+                $response['status'] = true;
+                $response['data'] = $items;
+            } else {
+                $response['message'] = 'No items found in cart.';
+            }
+        } catch (\Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    
     public function deleteCartItem($params) {
         $response = ['status' => false];
         try {
             $query = "DELETE FROM cartitems WHERE Id = :id";
             $conn = $this->db->connect();
             $stmt = $conn->prepare($query);
-            $stmt->bindParam(':id', $params['id']);
+            $stmt->bindParam(':id', $params['cartid']);
             $stmt->execute();
     
             if ($stmt->rowCount() > 0) {
