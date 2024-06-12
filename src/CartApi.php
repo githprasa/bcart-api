@@ -58,7 +58,6 @@ class CartApi{
             return $response;
         }
     }
-
     
     public function deleteCartItem($params) {
         $response = ['status' => false];
@@ -104,6 +103,33 @@ class CartApi{
                 $response['message'] = 'No changes made or cart item not found.';
             }
         } catch (Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function checkCartItem($params) {
+        $response = ['status' => false, 'exists' => false];
+        try {
+            $userId = $params['userId'] ?? '';
+            $productId = $params['productId'] ?? '';
+            $query = "SELECT COUNT(*) as count FROM cartitems WHERE UserId = :userId AND ProductId = :productId";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':userId', $userId);
+            $stmt->bindParam(':productId', $productId);
+            $stmt->execute();
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($result['count'] > 0) {
+                $response['status'] = true;
+                $response['exists'] = true;
+            } else {
+                $response['status'] = true;
+                $response['exists'] = false;
+            }
+        } catch (\Exception $e) {
             $response['message'] = 'Error: ' . $e->getMessage();
         } finally {
             $this->db->close();

@@ -451,6 +451,14 @@ $app->post('/api/cart/delete', function (Request $request, Response $response, $
     return $response;
 });
 
+$app->post('/api/cart/check', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->checkCartItem($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 $app->post('/api/order/add', function (Request $request, Response $response, $args) use ($database) {
     $OrdersApi = new OrdersApi($database);
     $data = $request->getParsedBody();
