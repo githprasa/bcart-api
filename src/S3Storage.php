@@ -10,7 +10,11 @@ class S3Storage {
         $this->db = $db;
         $this->client = new S3Client([
             'version' => 'latest',
-            'region'  => 'ap-south-1'
+            'region'  => 'ap-south-1',
+            'credentials' => [
+                'key'    => $_ENV['AWS_ACCESS_KEY_ID'],
+                'secret' => $_ENV['AWS_SECRET_ACCESS_KEY'],
+            ],
         ]);
         $this->bucketName ='abovsoftfiles';
     }
