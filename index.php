@@ -13,6 +13,7 @@ use App\OrdersApi;
 use App\CategoryApi;
 use App\LocationApi;
 use App\SettingsApi;
+use App\S3Storage;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -471,6 +472,31 @@ $app->post('/api/order/createOrderItem', function (Request $request, Response $r
     $OrdersApi = new OrdersApi($database);
     $data = $request->getParsedBody();
     $result = $OrdersApi->createOrderItem($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/product/imagesave', function (Request $request, Response $response, $args) use ($database) {
+    $S3Storage = new S3Storage($database);
+    $data = $request->getParsedBody();
+    $result = $S3Storage->imagesave($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->get('/api/product/getImageFiles', function (Request $request, Response $response, $args) use ($database) {
+    $S3Storage = new S3Storage($database);
+    $data = $request->getParsedBody();
+    $result = $S3Storage->getImageFiles($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+
+$app->post('/api/product/deleteImage', function (Request $request, Response $response, $args) use ($database) {
+    $S3Storage = new S3Storage($database);
+    $data = $request->getParsedBody();
+    $result = $S3Storage->deleteImage($data);
     $response->getBody()->write(json_encode($result));
     return $response;
 });
