@@ -487,14 +487,13 @@ $app->post('/api/product/imagesave', function (Request $request, Response $respo
     return $response;
 });
 
-$app->get('/api/product/getImageFiles', function (Request $request, Response $response, $args) use ($database) {
+$app->get('/api/product/getImageFiles/{id}', function (Request $request, Response $response, $args) use ($database) {
     $S3Storage = new S3Storage($database);
-    $data = $request->getParsedBody();
-    $result = $S3Storage->getImageFiles($data);
+    $id = isset($args['id'])? $args['id'] : '0';
+    $result = $S3Storage->getImageFiles($id);
     $response->getBody()->write(json_encode($result));
     return $response;
 });
-
 
 $app->post('/api/product/deleteImage', function (Request $request, Response $response, $args) use ($database) {
     $S3Storage = new S3Storage($database);

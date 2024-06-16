@@ -52,25 +52,27 @@ class S3Storage {
     }
 
 
-    public function getImageFiles($params=null) {
-        $response=[];
+    public function getImageFiles($id=null) {
+        $response = [];
         $response['status']=false;
         $response['data']='';
         try {
             $objects = $this->client->listObjectsV2([
                 'Bucket' => $this->bucketName,
-                'Prefix' => 'test/' // specify folder if needed
+                'Prefix' => 'test',//'productImages/product_'.$id.'/'
             ]);
         
             $files = [];
-            foreach ($objects['Contents'] as $object) {
-                $files[] = [
-                    'key' => $object['Key'],
-                    'url' => $this->client->getObjectUrl($this->bucketName, $object['Key']),
-                ];
+            if (is_array($objects['Contents']) && count($objects['Contents']) >0) {
+                foreach ($objects['Contents'] as $object) {
+                    $files[] = [
+                        'key' => $object['Key'],
+                        'url' => $this->client->getObjectUrl($this->bucketName, $object['Key']),
+                    ];
+                }
             }
             $response['status']=true;
-            $response['files']=$files;
+            $response['data']=$files;
         } catch (\Exception $e) {
             $response['message']='Error : ' . $e->getMessage();
             $response['file']= $e->getFile();
@@ -90,7 +92,7 @@ class S3Storage {
             $fileName=$params['fileName'] ?? '';
             $result = $this->client->deleteObject([
                 'Bucket' => $this->bucketName,
-                'Key'    => 'test/' . $fileName,
+                'Key'    => $fileName,
             ]);
             $response['status'] = true;
             $response['message'] = 'Image deleted successfully';
