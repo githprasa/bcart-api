@@ -57,11 +57,12 @@ class S3Storage {
         $response['status']=false;
         $response['data']='';
         try {
+            $pid='temp';
+            if(!empty($id)) $pid=$id;
             $objects = $this->client->listObjectsV2([
                 'Bucket' => $this->bucketName,
-                'Prefix' => 'test',//'productImages/product_'.$id.'/'
+                'Prefix' => 'product/'.$pid
             ]);
-        
             $files = [];
             if (is_array($objects['Contents']) && count($objects['Contents']) >0) {
                 foreach ($objects['Contents'] as $object) {
@@ -73,6 +74,12 @@ class S3Storage {
             }
             $response['status']=true;
             $response['data']=$files;
+            $filesJson = json_encode($files);
+            $response['filesJson']=$filesJson;
+            $conn = $this->db->connect();
+            $sql = "UPDATE product SET imagefiles = :imagefiles WHERE id = :id";
+            $stmt = $conn->prepare($sql);
+            $stmt->execute(['imagefiles' => $filesJson, 'id' => $pid]);
         } catch (\Exception $e) {
             $response['message']='Error : ' . $e->getMessage();
             $response['file']= $e->getFile();
@@ -96,6 +103,37 @@ class S3Storage {
             ]);
             $response['status'] = true;
             $response['message'] = 'Image deleted successfully';
+        } catch (\Exception $e) {
+            $response['message'] = 'Error : ' . $e->getMessage();
+            $response['file'] = $e->getFile();
+            $response['line number'] = $e->getLine();
+            $response['logResult'] = -1;
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function getPresignedUrl($params=null) {
+        $response = [];
+        $response['status'] = false;
+        try {
+            $fileName = $params['fileName'] ?? 'test.jpg';
+            $productid = $params['productid'] ?? 'temp';
+            $fileKey = 'product/'.$productid.'/'.$fileName; 
+            $response['fileKey'] = $fileKey;
+            // Setting up the presigned request options
+            $cmd = $this->client->getCommand('PutObject', [
+                'Bucket' => $this->bucketName,
+                'Key'    => $fileKey,
+                'ContentType' => 'image/jpeg'
+            ]);
+            $expiry = "+20 minutes";
+            $request = $this->client->createPresignedRequest($cmd, $expiry);
+            $presignedUrl = (string) $request->getUri();
+            $response['status'] = true;
+            $response['presignedUrl'] = $presignedUrl;
+            $response['fields'] = ['key'=>$fileKey];
         } catch (\Exception $e) {
             $response['message'] = 'Error : ' . $e->getMessage();
             $response['file'] = $e->getFile();

@@ -150,6 +150,11 @@ $app->post('/api/products/addProduct', function (Request $request, Response $res
     return $response;
 });
 
+$app->get('/api/product/test', function (Request $request, Response $response, $args) {
+    $response->getBody()->write(json_encode(['response test']));
+    return $response;
+});
+
 /*Update product
 $app->post('/api/products/updateProduct', function (Request $request, Response $response) use ($database) {
     $productApi = new ProductApi($database);
@@ -499,6 +504,14 @@ $app->post('/api/product/deleteImage', function (Request $request, Response $res
     $S3Storage = new S3Storage($database);
     $data = $request->getParsedBody();
     $result = $S3Storage->deleteImage($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/product/getPresignedUrl', function (Request $request, Response $response, $args) use ($database) {
+    $S3Storage = new S3Storage($database);
+    $data = $request->getParsedBody();
+    $result = $S3Storage->getPresignedUrl($data);
     $response->getBody()->write(json_encode($result));
     return $response;
 });

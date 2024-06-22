@@ -14,7 +14,7 @@ class ProductApi {
         $response['data']='';
         try {
             $query = "SELECT P.id, P.Product , P.Description , P.Detail_Description, P.ERP_Item_Reference, P.IsActive, C.Category, V.vendor,
-                      P.ContractNumber, P.ContractItemNumber, P.Deliverytime, L.LocationName, P.price from product P 
+                      P.ContractNumber, P.ContractItemNumber, P.Deliverytime, L.LocationName, P.price, P.imagefiles from product P 
                       left join category C on C.id = P.Category
                       left join vendor V on V.id = P.Vendor
                       left join locations L on L.Id = P.Location";
@@ -23,15 +23,15 @@ class ProductApi {
             $stmt = $conn->prepare($query);
             $stmt->execute();
             $row_result = $stmt->fetchAll();
-            if(count($row_result) >0) {
-                $response['status']=true;
-                $response['data']=$row_result;
+            if (count($row_result) >0) {
+                $response['status'] = true;
+                $response['data'] = $row_result;
             }
         } catch (\Exception $e) {
-            $response['message']='Error : ' . $e->getMessage();
-            $response['file']= $e->getFile();
-            $response['line number']=$e->getLine();
-            $response['logResult']=-1;            
+            $response['message'] = 'Error : '.$e->getMessage();
+            $response['file'] = $e->getFile();
+            $response['line number'] = $e->getLine();
+            $response['logResult'] = -1;            
         } finally {
             $this->db->close();
             return $response;
@@ -46,7 +46,7 @@ class ProductApi {
             $query = "SELECT P.id,P.Product,P.Description,P.Detail_Description,C.Category as Category,V.Vendor as Vendor,
                     P.ERP_Item_Reference,P.IsActive,P.ContractNumber,
                     P.ContractItemNumber,P.Deliverytime,L.LocationName as Location,
-                    P.price from product P left join category C on C.id = P.Category
+                    P.price,P.imagefiles from product P left join category C on C.id = P.Category
                       left join vendor V on V.id = P.Vendor
                       left join locations L on L.Id = P.Location where P.id = :id";
 
