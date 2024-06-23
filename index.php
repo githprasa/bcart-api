@@ -436,9 +436,9 @@ $app->post('/api/cart/add', function (Request $request, Response $response, $arg
     return $response;
 });
 
-$app->get('/api/cart/list', function (Request $request, Response $response, $args) use ($database) {
+$app->get('/api/cart/list/{id}', function (Request $request, Response $response, $args) use ($database) {
     $CartApi = new CartApi($database);
-    $userId=1;
+    $userId = isset($args['id'])? $args['id'] : 0;
     $result = $CartApi->getCartItems($userId);
     $response->getBody()->write(json_encode($result));
     return $response;
@@ -464,6 +464,29 @@ $app->post('/api/cart/check', function (Request $request, Response $response, $a
     $CartApi = new CartApi($database);
     $data = $request->getParsedBody();
     $result = $CartApi->checkCartItem($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+$app->post('/api/cart/updatequantity', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->updateCartItemQuantity($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/cart/updatevendor', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->updateCartItemVendorId($data);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->post('/api/cart/updatelocation', function (Request $request, Response $response, $args) use ($database) {
+    $CartApi = new CartApi($database);
+    $data = $request->getParsedBody();
+    $result = $CartApi->updateCartItemLocation($data);
     $response->getBody()->write(json_encode($result));
     return $response;
 });

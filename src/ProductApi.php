@@ -14,7 +14,8 @@ class ProductApi {
         $response['data']='';
         try {
             $query = "SELECT P.id, P.Product , P.Description , P.Detail_Description, P.ERP_Item_Reference, P.IsActive, C.Category, V.vendor,
-                      P.ContractNumber, P.ContractItemNumber, P.Deliverytime, L.LocationName, P.price, P.imagefiles from product P 
+                      P.ContractNumber, P.ContractItemNumber, P.Deliverytime, P.Category as CategoryId,P.Vendor as VendorId,P.Location as LocationId,
+                      L.LocationName, P.price, P.imagefiles from product P 
                       left join category C on C.id = P.Category
                       left join vendor V on V.id = P.Vendor
                       left join locations L on L.Id = P.Location";
@@ -43,7 +44,7 @@ class ProductApi {
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT P.id,P.Product,P.Description,P.Detail_Description,C.Category as Category,V.Vendor as Vendor,
+            $query = "SELECT P.id,P.Product,P.Description,P.Detail_Description,C.Category as Category,V.Vendor as Vendor,P.Vendor as Vendorid,
                     P.ERP_Item_Reference,P.IsActive,P.ContractNumber,
                     P.ContractItemNumber,P.Deliverytime,L.LocationName as Location,
                     P.price,P.imagefiles from product P left join category C on C.id = P.Category

@@ -13,7 +13,7 @@ class UserApi {
         $response['status']=false;
         $response['data']='';
         try {
-            $query = "SELECT * FROM users WHERE UserId = :user AND Password = SHA1(:password)";
+            $query = "SELECT Id,FirstName,CostObject,RoleId,Email,LocationId,Currency FROM users WHERE UserId = :user AND Password = SHA1(:password)";
             $conn = $this->db->connect();
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':user', $user);
@@ -92,7 +92,7 @@ class UserApi {
         $response['data']='';
         try {
             $query = "INSERT INTO users (FirstName, LastName,RoleId,Email,Phone,Address1,Address2,UserId,Password,LocationId,CostObject,Currency) 
-                      values (:FirstName, :LastName,:RoleId,:Email,:Phone,:Address1,:Address2,:UserId,:Password,:LocationId,:CostObject,:Currency)";
+                      values (:FirstName, :LastName,:RoleId,:Email,:Phone,:Address1,:Address2,:UserId,SHA1(:Password),:LocationId,:CostObject,:Currency)";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -135,7 +135,13 @@ class UserApi {
         try {
             $query = "UPDATE users SET FirstName=:FirstName, LastName= :LastName, RoleId = :RoleId,
             Email = :Email,Phone=:Phone,Address1=:Address1,Address2=:Address2,UserId=:UserId,
-            Password=:Password,LocationId=:LocationId,CostObject=:CostObject ,Currency=:Currency WHERE Id =:id ";
+            Password=SHA1(:Password),LocationId=:LocationId,CostObject=:CostObject ,Currency=:Currency WHERE Id =:id ";
+            if(trim($params['Password'])=='') {
+                $query = "UPDATE users SET FirstName=:FirstName, LastName= :LastName, RoleId = :RoleId,
+                Email = :Email,Phone=:Phone,Address1=:Address1,Address2=:Address2,UserId=:UserId,
+                LocationId=:LocationId,CostObject=:CostObject ,Currency=:Currency WHERE Id =:id ";
+            }
+
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -147,7 +153,9 @@ class UserApi {
             $stmt->bindParam(':Address1', $params['Address1']);
             $stmt->bindParam(':Address2', $params['Address2']);
             $stmt->bindParam(':UserId', $params['UserId']);
+            if(trim($params['Password']) !='') {
             $stmt->bindParam(':Password', $params['Password']);
+            }
             $stmt->bindParam(':LocationId', $params['LocationId']);
             $stmt->bindParam(':CostObject', $params['CostObject']);
             $stmt->bindParam(':Currency', $params['Currency']);

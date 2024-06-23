@@ -39,9 +39,11 @@ class CartApi{
     public function getCartItems($userId) {
         $response = ['status' => false, 'data' => []];
         try {
-            $query = "SELECT c.id as cartItemId,c.UserId,c.ProductId,c.Quantity,c.VendorId as vendor,c.Location as location,p.Product as name,p.price as price FROM cartitems c JOIN  product p ON c.ProductId = p.id";
+            $query = "SELECT c.id as cartItemId,c.UserId,c.ProductId,c.Quantity,c.VendorId as vendor,c.Location as location,
+            p.Product as name,p.price as price FROM cartitems c JOIN  product p ON c.ProductId = p.id WHERE c.UserId=:userId";
             $conn = $this->db->connect();
             $stmt = $conn->prepare($query);
+            $stmt->bindParam(':userId', $userId);
             $stmt->execute();
             $items = $stmt->fetchAll();
     
@@ -94,6 +96,79 @@ class CartApi{
             $stmt->bindParam(':quantity', $params['quantity']);
             $stmt->bindParam(':vendorId', $params['vendorId']);
             $stmt->bindParam(':locationId', $params['locationId']);
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $response['status'] = true;
+                $response['message'] = 'Cart item updated successfully.';
+            }else {
+                $response['message'] = 'No changes made or cart item not found.';
+            }
+        } catch (Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+
+    public function updateCartItemQuantity($params) {
+        $response = ['status' => false];
+        try {
+            $query = "UPDATE cartitems SET Quantity = :quantity WHERE Id = :id";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':quantity', $params['quantity']);
+            $stmt->bindParam(':id', $params['id']);
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $response['status'] = true;
+                $response['message'] = 'Cart item updated successfully.';
+            } else {
+                $response['message'] = 'No changes made or cart item not found.';
+            }
+        } catch (Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function updateCartItemVendorId($params) {
+        $response = ['status' => false];
+        try {
+            $query = "UPDATE cartitems SET VendorId = :vendorId WHERE Id = :id";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':vendorId', $params['vendorId']);
+            $stmt->bindParam(':id', $params['id']);
+            $stmt->execute();
+    
+            if ($stmt->rowCount() > 0) {
+                $response['status'] = true;
+                $response['message'] = 'Cart item updated successfully.';
+            } else {
+                $response['message'] = 'No changes made or cart item not found.';
+            }
+        } catch (Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function updateCartItemLocation($params) {
+        $response = ['status' => false];
+        try {
+            $query = "UPDATE cartitems SET Location = :locationId WHERE Id = :id";
+            $conn = $this->db->connect();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':locationId', $params['locationId']);
+            $stmt->bindParam(':id', $params['id']);
             $stmt->execute();
     
             if ($stmt->rowCount() > 0) {
