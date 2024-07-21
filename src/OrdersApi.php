@@ -92,59 +92,10 @@ class OrdersApi {
         }
     }
     
-    // public function deleteOrder($param) {
-    //     $response = ['status' => false];
-    //     try {
-    //         $query = "DELETE FROM orders WHERE OrderId = :orderId";
-    //         $conn = $this->db->connect();
-    //         $stmt = $conn->prepare($query);
-    //         $stmt->bindParam(':orderId', $param['orderId']);
-    //         $stmt->execute();
-    
-    //         if ($stmt->rowCount() > 0) {
-    //             $response['status'] = true;
-    //             $response['message'] = 'Order deleted successfully.';
-    //         } else {
-    //             $response['message'] = 'No changes made or order item not found.';
-    //         }
-    //     } catch (Exception $e) {
-    //         $response['message'] = 'Error: ' . $e->getMessage();
-    //     } finally {
-    //         $this->db->close();
-    //         return $response;
-    //     }
-    // }
-    
-    // public function updateOrder($param) {
-    //     $response = ['status' => false];
-    //     try {
-    //         $query = "UPDATE orders SET UserId = :userId, OrderDate = :orderDate, TotalAmount = :totalAmount, IsCompleted = :isCompleted, ApiCallStatus = :apiCallStatus WHERE OrderId = :orderId";
-    //         $conn = $this->db->connect();
-    //         $stmt = $conn->prepare($query);
-    //         $stmt->bindParam(':orderId', $param['orderId']);
-    //         $stmt->bindParam(':userId', $param['userId']);
-    //         $stmt->bindParam(':orderDate', $param['orderDate']);
-    //         $stmt->bindParam(':totalAmount', $param['totalAmount']);
-    //         $stmt->bindParam(':isCompleted', $param['isCompleted']);
-    //         $stmt->bindParam(':apiCallStatus', $param['apiCallStatus']);
-    //         $stmt->execute();
-    //         if ($stmt->rowCount() > 0) {
-    //             $response['status'] = true;
-    //             $response['message'] = 'Order updated successfully.';
-    //         } else {
-    //             $response['message'] = 'No changes made or order item not found.';
-    //         }
-    //     } catch (Exception $e) {
-    //         $response['message'] = 'Error: ' . $e->getMessage();
-    //     } finally {
-    //         $this->db->close();
-    //         return $response;
-    //     }
-    // }
-    
     public function createOrderItem($param) {
         $response = ['status' => false];
         try {
+            $conn = $this->db->connect();
             $query = "SELECT * FROM cartitems WHERE UserId = :UserId";
             $stmt = $conn->prepare($query);
             $stmt->bindParam(':UserId', $param['UserId']);
@@ -177,55 +128,76 @@ class OrdersApi {
         }
     }
     
-    // public function deleteOrderItem($param) {
-    //     $response = ['status' => false];
-    //     try {
-    //         $query = "DELETE FROM orderitems WHERE OrderItemId = :orderItemId";
-    //         $conn = $this->db->connect();
-    //         $stmt = $conn->prepare($query);
-    //         $stmt->bindParam(':orderItemId', $param['orderItemId']);
-    //         $stmt->execute();
-    
-    //         if ($stmt->rowCount() > 0) {
-    //             $response['status'] = true;
-    //             $response['message'] = 'Order item deleted successfully.';
-    //         } else {
-    //             $response['message'] = 'No changes made or order item not found.';
-    //         }
-    //     } catch (Exception $e) {
-    //         $response['message'] = 'Error: ' . $e->getMessage();
-    //     } finally {
-    //         $this->db->close();
-    //         return $response;
-    //     }
-    // }
+    public function getList($id) {
+        $response = ['status' => false];
+        try {
+            $conn = $this->db->connect();
+            // Fetch orders based on UserId
+            $query = "SELECT *,DATE(orders.OrderDate) as odate,CONCAT(users.FirstName, ' ', users.LastName) as orderedBy FROM orders JOIN users ON orders.UserId = users.Id WHERE orders.UserId = :UserId";
 
-    // public function updateOrderItem($param) {
-    //     $response = ['status' => false];
-    //     try {
-    //         $query = "UPDATE orderitems SET OrderId = :orderId, ProductId = :productId, Quantity = :quantity, Price = :price, VendorId = :vendorId, LocationId = :locationId WHERE OrderItemId = :orderItemId";
-    //         $conn = $this->db->connect();
-    //         $stmt = $conn->prepare($query);
-    //         $stmt->bindParam(':orderItemId', $param['orderItemId']);
-    //         $stmt->bindParam(':orderId', $param['orderId']);
-    //         $stmt->bindParam(':productId', $param['productId']);
-    //         $stmt->bindParam(':quantity', $param['quantity']);
-    //         $stmt->bindParam(':price', $param['price']);
-    //         $stmt->bindParam(':vendorId', $param['vendorId']);
-    //         $stmt->bindParam(':locationId', $param['locationId']);
-    //         $stmt->execute();
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':UserId', $id);
+            $stmt->execute();
+            $orders = $stmt->fetchAll(\PDO::FETCH_ASSOC);
     
-    //         if ($stmt->rowCount() > 0) {
-    //             $response['status'] = true;
-    //             $response['message'] = 'Order item updated successfully.';
-    //         } else {
-    //             $response['message'] = 'No changes made or order item not found.';
-    //         }
-    //     } catch (Exception $e) {
-    //         $response['message'] = 'Error: ' . $e->getMessage();
-    //     } finally {
-    //         $this->db->close();
-    //         return $response;
-    //     }
-    // }
+            if(count($orders)) {
+                $orderIds = array_column($orders, 'OrderId');
+                $orderIdsString = implode(',', array_map('intval', $orderIds));
+    
+                // Fetch order items based on OrderIds
+                $query = "SELECT * FROM orderitems WHERE OrderId IN ($orderIdsString)";
+                $stmt = $conn->prepare($query);
+                $stmt->execute();
+                $orderItems = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    
+                // Process and organize order items
+                $orderDetails = [];
+                foreach ($orderItems as $item) {
+                    $productDetails = json_decode($item['ProductId'], true);
+                    $vendorDetails = json_decode($item['VendorId'], true);
+                    $locationDetails = json_decode($item['LocationId'], true);
+    
+                    if (!isset($orderDetails[$item['OrderId']])) {
+                        $orderDetails[$item['OrderId']] = [];
+                    }
+    
+                    $orderDetails[$item['OrderId']][] = [
+                        'quantity' => $item['Quantity'],
+                        'price' => $item['Price'],
+                        'product' => $productDetails,
+                        'vendor' => $vendorDetails,
+                        'location' => $locationDetails
+                    ];
+                }
+
+                $responseOrders = [];
+                foreach ($orders as $order) {
+                    $details = isset($orderDetails[$order['OrderId']]) ? $orderDetails[$order['OrderId']] : [];
+                    $totalAmount = array_reduce($details, function ($sum, $item) {
+                        return $sum + ($item['price'] * $item['quantity']);
+                    }, 0);
+                    $productDetailsString = implode(', ', array_map(function ($detail) {
+                        return ($detail['product'][0]['Product'] ?? '') . ', Size: ' . ($detail['product'][0]['Description'] ?? '') . ' - Quantity: ' . ($detail['quantity'] ?? '');
+                    }, $details));
+    
+                    $responseOrders[] = [
+                        'id' => $order['OrderId'],
+                        'orderedBy' => $order['orderedBy'] ?? '',
+                        'orderDate' => $order['OrderDate'] ?? '',
+                        'odate' => $order['odate'] ?? '',
+                        'totalAmount' => $order['TotalAmount'] ? intval($order['TotalAmount']) : 0,
+                        'details' => $productDetailsString
+                    ];
+                }
+                $response['data'] = $responseOrders;
+                $response['status'] = true;
+            }
+        } catch (Exception $e) {
+            $response['message'] = 'Error: ' . $e->getMessage();
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+    
 }

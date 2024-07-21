@@ -34,9 +34,6 @@ $corsMiddleware = function (Request $request, RequestHandlerInterface $handler) 
         ->withHeader('Access-Control-Allow-Origin', '*')
         ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
         ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    // if ($request->getMethod() == 'OPTIONS') {
-    //     return $response;
-    // }
     return $response;
 };
 
@@ -507,6 +504,14 @@ $app->post('/api/order/createOrderItem', function (Request $request, Response $r
     return $response;
 });
 
+$app->get('/api/order/getList/{id}', function (Request $request, Response $response, $args) use ($database) {
+    $OrdersApi = new OrdersApi($database);
+    $id = isset($args['id'])? $args['id'] : '0';
+    $result = $OrdersApi->getList($id);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 $app->post('/api/product/imagesave', function (Request $request, Response $response, $args) use ($database) {
     $S3Storage = new S3Storage($database);
     $data = $request->getParsedBody();
@@ -519,6 +524,13 @@ $app->get('/api/product/getImageFiles/{id}', function (Request $request, Respons
     $S3Storage = new S3Storage($database);
     $id = isset($args['id'])? $args['id'] : '0';
     $result = $S3Storage->getImageFiles($id);
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
+$app->get('/api/product/updateImageFiles', function (Request $request, Response $response, $args) use ($database) {
+    $S3Storage = new S3Storage($database);
+    $result = $S3Storage->updateImageFiles();
     $response->getBody()->write(json_encode($result));
     return $response;
 });

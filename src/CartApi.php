@@ -12,21 +12,48 @@ class CartApi{
     public function insertCartItem($params) {
         $response = ['status' => false];
         try {
-            $query = "INSERT INTO cartitems (UserId, ProductId, Quantity, VendorId, Location) VALUES (:userId, :productId, :quantity, :vendorId, :locationId)";
-            $conn = $this->db->connect();            
-            $stmt = $conn->prepare($query);
-            $stmt->bindParam(':userId', $params['userId']);
-            $stmt->bindParam(':productId', $params['productId']);
-            $stmt->bindParam(':quantity', $params['quantity']);
-            $stmt->bindParam(':vendorId', $params['vendorId']);
-            $stmt->bindParam(':locationId', $params['locationId']);
-            $stmt->execute();
-    
-            if ($stmt->rowCount() > 0) {
-                $response['status'] = true;
-                $response['message'] = 'Item added to cart successfully.';
-            }else {
-                $response['message'] = 'Failed to add item to cart.';
+            $conn = $this->db->connect();     
+            $checkQuery = "SELECT Quantity FROM cartitems WHERE UserId = :userId AND ProductId = :productId";
+            $checkStmt = $conn->prepare($checkQuery);
+            $checkStmt->bindParam(':userId', $params['userId']);
+            $checkStmt->bindParam(':productId', $params['productId']);
+            $checkStmt->execute();
+            $result = $checkStmt->fetch(\PDO::FETCH_ASSOC);
+            if ($result) {
+                $newQuantity = $result['Quantity'] + $params['quantity'];
+                $updateQuery = "
+                    UPDATE cartitems 
+                    SET Quantity = :quantity, VendorId = :vendorId, Location = :locationId 
+                    WHERE UserId = :userId AND ProductId = :productId
+                ";
+                $updateStmt = $conn->prepare($updateQuery);
+                $updateStmt->bindParam(':quantity', $newQuantity);
+                $updateStmt->bindParam(':vendorId', $params['vendorId']);
+                $updateStmt->bindParam(':locationId', $params['locationId']);
+                $updateStmt->bindParam(':userId', $params['userId']);
+                $updateStmt->bindParam(':productId', $params['productId']);
+                $updateStmt->execute();
+
+                if ($updateStmt->rowCount() > 0) {
+                    $response['status'] = true;
+                    $response['message'] = 'Item quantity updated in cart successfully.';
+                }
+            } else {
+                $query = "INSERT INTO cartitems (UserId, ProductId, Quantity, VendorId, Location) VALUES (:userId, :productId, :quantity, :vendorId, :locationId)";
+                $stmt = $conn->prepare($query);
+                $stmt->bindParam(':userId', $params['userId']);
+                $stmt->bindParam(':productId', $params['productId']);
+                $stmt->bindParam(':quantity', $params['quantity']);
+                $stmt->bindParam(':vendorId', $params['vendorId']);
+                $stmt->bindParam(':locationId', $params['locationId']);
+                $stmt->execute();
+        
+                if ($stmt->rowCount() > 0) {
+                    $response['status'] = true;
+                    $response['message'] = 'Item added to cart successfully.';
+                }else {
+                    $response['message'] = 'Failed to add item to cart.';
+                }
             }
         } catch (\Exception $e) {
             $response['message'] = 'Error: ' . $e->getMessage();

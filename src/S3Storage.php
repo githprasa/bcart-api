@@ -91,6 +91,50 @@ class S3Storage {
         }
     }
 
+
+    public function updateImageFiles($id=null) {
+        $response = [];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            $conn = $this->db->connect();
+            $sqlSelect = "SELECT id FROM product";
+            $stmtSelect = $conn->prepare($sqlSelect);
+            $stmtSelect->execute();
+            $productIds = $stmtSelect->fetchAll(\PDO::FETCH_COLUMN, 0);
+            foreach ($productIds as $id) {
+                $pid = $id;
+                $objects = $this->client->listObjectsV2([
+                    'Bucket' => $this->bucketName,
+                    'Prefix' => 'product/'.$pid
+                ]);
+                $files = [];
+                if (is_array($objects['Contents']) && count($objects['Contents']) >0) {
+                    foreach ($objects['Contents'] as $object) {
+                        $files[] = [
+                            'key' => $object['Key'],
+                            'url' => $this->client->getObjectUrl($this->bucketName, $object['Key']),
+                        ];
+                    }
+                }
+                $response['status']=true;
+                $response['product-'.$id]=count($files);
+                $filesJson = json_encode($files);
+                $sql = "UPDATE product SET imagefiles = :imagefiles WHERE id = :id";
+                $stmt = $conn->prepare($sql);
+                $stmt->execute(['imagefiles' => $filesJson, 'id' => $pid]);
+            }
+        } catch (\Exception $e) {
+            $response['message']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;            
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
     public function deleteImage($params=null) {
         $response = [];
         $response['status'] = false;
