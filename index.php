@@ -123,12 +123,21 @@ $app->post('/api/user/deleteUser', function (Request $request, Response $respons
 
 /*product*/
 /*get full product list*/
-$app->get('/api/products/getlist', function (Request $request, Response $response, $args) use ($database) {
+$app->get('/api/products/getlist/{id}', function (Request $request, Response $response, $args) use ($database) {
     $productApi = new ProductApi($database);
-    $result = $productApi->productResult();
+    $id = isset($args['id'])? $args['id'] : 0;
+    $result = $productApi->productResult($id);
     $response->getBody()->write(json_encode($result));
     return $response;
 });
+
+$app->get('/api/products/getlist', function (Request $request, Response $response, $args) use ($database) {
+    $productApi = new ProductApi($database);
+    $result = $productApi->productlist();
+    $response->getBody()->write(json_encode($result));
+    return $response;
+});
+
 /*get product details*/
 $app->get('/api/products/getProductdetails/{id}', function (Request $request, Response $response, $args) use ($database) {
     $productApi = new ProductApi($database);

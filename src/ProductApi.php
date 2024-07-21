@@ -8,7 +8,40 @@ class ProductApi {
         $this->db = $db;
     }
 
-    public function productResult() {
+    public function productResult($id) {
+        $response=[];
+        $response['status']=false;
+        $response['data']='';
+        try {
+            $query = "SELECT P.id, P.Product , P.Description , P.Detail_Description, P.ERP_Item_Reference, P.IsActive, C.Category, V.vendor,
+                      P.ContractNumber, P.ContractItemNumber, P.Deliverytime, P.Category as CategoryId,P.Vendor as VendorId,P.Location as LocationId,
+                      L.LocationName, P.price, P.imagefiles,ci.Quantity from product P 
+                      left join category C on C.id = P.Category
+                      left join vendor V on V.id = P.Vendor
+                      left join locations L on L.Id = P.Location
+                      left join cartitems ci on ci.ProductId = P.id and UserId=:id";
+
+            $conn = $this->db->connect();            
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+            $row_result = $stmt->fetchAll();
+            if (count($row_result) >0) {
+                $response['status'] = true;
+                $response['data'] = $row_result;
+            }
+        } catch (\Exception $e) {
+            $response['message'] = 'Error : '.$e->getMessage();
+            $response['file'] = $e->getFile();
+            $response['line number'] = $e->getLine();
+            $response['logResult'] = -1;            
+        } finally {
+            $this->db->close();
+            return $response;
+        }
+    }
+
+    public function productlist() {
         $response=[];
         $response['status']=false;
         $response['data']='';
