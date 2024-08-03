@@ -105,32 +105,33 @@ class ProductApi {
         }
     }
 
-    public function addProduct($params){
+    public function addProduct($params) {
         $response=[];
-        $response['status']=false;
-        $response['data']='';
+        $response['status'] = false;
+        $response['data'] = '';
         try {
+
             $conn = $this->db->connect();
             $locationQuery = "SELECT Id FROM locations WHERE LocationName = :location";
             $locationStmt = $conn->prepare($locationQuery);
             $locationStmt->bindParam(':location', $params['Location']);
             $locationStmt->execute();
             $location = $locationStmt->fetch(\PDO::FETCH_ASSOC);
-            $location=$location['Id'] ?? '0';
-            // For Vendor
+            $location = $location['Id'] ?? '0';
+
             $vendorQuery = "SELECT id FROM vendor WHERE Vendor = :vendor";
             $vendorStmt = $conn->prepare($vendorQuery);
             $vendorStmt->bindParam(':vendor', $params['Vendor']);
             $vendorStmt->execute();
             $vendor = $vendorStmt->fetch(\PDO::FETCH_ASSOC);
-            $vendorId = $vendor['id'] ?? '0'; // Default to '0' if not found
-            // For Category
+            $vendorId = $vendor['id'] ?? '0'; 
+
             $categoryQuery = "SELECT id FROM category WHERE Category = :category";
             $categoryStmt = $conn->prepare($categoryQuery);
             $categoryStmt->bindParam(':category', $params['Category']);
             $categoryStmt->execute();
             $category = $categoryStmt->fetch(\PDO::FETCH_ASSOC);
-            $categoryId = $category['id'] ?? '0'; // Default to '0' if not found
+            $categoryId = $category['id'] ?? '0';
 
             $query = "INSERT INTO product (Product, Description, Detail_Description, Category,
                       Vendor,ERP_Item_Reference,IsActive,ContractNumber,ContractItemNumber,Deliverytime,Location,price) 
@@ -168,12 +169,12 @@ class ProductApi {
         }
     }
 
-    public function bulkaddProduct($params){
+    public function bulkaddProduct($params) {
         $response=[];
-        $response['status']=false;
-        $response['data']='';
+        $response['status'] = false;
+        $response['data'] = '';
         try {
-            if(is_array($params) && count($params) > 0) {
+            if (is_array($params) && count($params) > 0) {
                 $query = "INSERT INTO product (Product, Description, Detail_Description, Category,
                         Vendor,ERP_Item_Reference,IsActive,ContractNumber,ContractItemNumber,Deliverytime,Location,price) 
                         values (:product,:description,:detaildescription,:category,:vendor,:erp,:isactive,:contractnumber,
@@ -181,6 +182,10 @@ class ProductApi {
                 $conn = $this->db->connect();            
                 $stmt = $conn->prepare($query);
                 foreach ($params as $products) {
+                    $products['location'] = $this->getOrInsert($conn, 'locations', 'LocationName', ($products['location'] ?? ''));
+                    $products['vendor'] = $this->getOrInsert($conn, 'vendor', 'Vendor', ($products['vendor'] ?? ''));
+                    $products['category'] = $this->getOrInsert($conn, 'category', 'Category', ($products['category'] ?? ''));
+                    $response['datdda'] = $products;
                     $stmt->bindParam(':product', $products['product']);
                     $stmt->bindParam(':description', $products['description']);
                     $stmt->bindParam(':detaildescription', $products['detail_description']);
@@ -206,6 +211,35 @@ class ProductApi {
         } finally {
             $this->db->close();
             return $response;
+        }
+    }
+
+    public function getOrInsert($conn, $table, $column, $value) {
+        try {
+            if(trim($value) == '') {
+                return '';
+            }
+            $response=[];
+            $query = "SELECT id FROM $table WHERE $column = :value";
+            $stmt = $conn->prepare($query);
+            $stmt->bindParam(':value', $value);
+            $stmt->execute();
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+            if ($result) {
+                return $result['id'] ?? '0';
+            } else {
+                $insertQuery = "INSERT INTO $table ($column) VALUES (:value)";
+                $insertStmt = $conn->prepare($insertQuery);
+                $insertStmt->bindParam(':value', $value);
+                $insertStmt->execute();
+                return $conn->lastInsertId();
+            }
+        } catch (\Exception $e) {
+            $response['message']='Error : ' . $e->getMessage();
+            $response['file']= $e->getFile();
+            $response['line number']=$e->getLine();
+            $response['logResult']=-1;            
         }
     }
 

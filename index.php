@@ -377,6 +377,7 @@ $app->post('/api/settings/addSetting', function (Request $request, Response $res
     $settingparams['apikey'] = isset($data['ApiKey'])? $data['ApiKey'] : '';
     $settingparams['apisecret'] = isset($data['ApiSecret'])? $data['ApiSecret'] : '';
     $settingparams['additionalfields'] = isset($data['AdditionalFields'])? $data['AdditionalFields'] : '';
+    $settingparams['FileType'] = isset($data['FileType'])? $data['FileType'] : '';
     $result = $settingsApi->addSetting($settingparams);
     $response->getBody()->write(json_encode($result));
     return $response;
@@ -393,6 +394,7 @@ $app->post('/api/settings/updateSetting', function (Request $request, Response $
     $settingparams['apisecret'] = isset($data['ApiSecret'])? $data['ApiSecret'] : '';
     $settingparams['additionalfields'] = isset($data['AdditionalFields'])? $data['AdditionalFields'] : '';
     $settingparams['id'] = isset($data['id'])? $data['id'] : '';
+    $settingparams['FileType'] = isset($data['FileType'])? $data['FileType'] : '';
     $result = $settingsApi->updateSetting($settingparams);
     $response->getBody()->write(json_encode($result));
     return $response;

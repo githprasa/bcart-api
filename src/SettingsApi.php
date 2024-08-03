@@ -66,13 +66,13 @@ class SettingsApi {
         }
     }
 
-    public function addSetting($params){
+    public function addSetting($params) {
         $response=[];
-        $response['status']=false;
-        $response['data']='';
+        $response['status'] = false;
+        $response['data'] = '';
         try {
-            $query = "INSERT INTO settings (AppName, ApiUrl,ApiKey,ApiSecret,AdditionalFields) 
-                      values (:appname,:apiurl,:apikey,:apisecret,:additionalfields)";
+            $query = "INSERT INTO settings (AppName, ApiUrl,ApiKey,ApiSecret,AdditionalFields,FileType) 
+                      values (:appname,:apiurl,:apikey,:apisecret,:additionalfields,:FileType)";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -81,12 +81,12 @@ class SettingsApi {
             $stmt->bindParam(':apikey', $params['apikey']);
             $stmt->bindParam(':apisecret', $params['apisecret']);
             $stmt->bindParam(':additionalfields', $params['additionalfields']);
+            $stmt->bindParam(':FileType', $params['FileType']);
             $result = $stmt->execute();
-            if($result){
-                $response['status']=true;
-                $response['data']='New Settings added successfully';
+            if ($result) {
+               $response['status']=true;
+               $response['data']='New Settings added successfully';
             }
-            
         } catch (\Exception $e) {
             $response['message']='Error : ' . $e->getMessage();
             $response['file']= $e->getFile();
@@ -99,13 +99,13 @@ class SettingsApi {
 
     }
 
-    public function updateSetting($params){
+    public function updateSetting($params) {
         $response=[];
         $response['status']=false;
         $response['data']='';
         try {
             $query = "UPDATE settings SET AppName = :appname, ApiUrl = :apiurl,ApiKey = :apikey,
-            ApiSecret =:apisecret,AdditionalFields = :additionalfields WHERE SettingId =:id ";
+            ApiSecret =:apisecret,AdditionalFields = :additionalfields,FileType = :FileType WHERE SettingId =:id ";
 
             $conn = $this->db->connect();            
             $stmt = $conn->prepare($query);
@@ -115,12 +115,12 @@ class SettingsApi {
             $stmt->bindParam(':apisecret', $params['apisecret']);
             $stmt->bindParam(':additionalfields', $params['additionalfields']);
             $stmt->bindParam(':id', $params['id']);
+            $stmt->bindParam(':FileType', $params['FileType']);
             $result = $stmt->execute();
-            if($result){
+            if ($result) {
                 $response['status']=true;
                 $response['data']='Updated Setting successfully';
             }
-            
         } catch (\Exception $e) {
             $response['message']='Error : ' . $e->getMessage();
             $response['file']= $e->getFile();
